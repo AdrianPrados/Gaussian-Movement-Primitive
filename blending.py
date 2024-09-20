@@ -23,9 +23,6 @@ size_via_points = 2
 x1_ = np.random.uniform(0.5, 1.0, size_via_points)
 y1_ = np.sin(2 * np.pi * x1_) + np.cos(2 * np.pi * x1_)
 
-print(x1_.shape)
-print(y1_.shape)
-time.sleep(1000)
 progp_mp1 = ProGpMp(x1.reshape(-1, 1), y1, x1_.reshape(-1, 1), y1_,dim=1, observation_noise=0.4,demos=1,size= size_set)
 print('progp_mp1 training...')
 progp_mp1.train()
