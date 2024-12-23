@@ -27,7 +27,7 @@ Clone the repository in your system.
 ```bash
 git clone https://github.com/AdrianPrados/Gaussian-Movement-Primitive.git
 ```
-The enter the directory and isnatll all the requierements:
+Then enter the directory and install all the requierements:
 ```bash
 cd Gaussian-Movement-Primitive
 pip install -r requirements.txt
