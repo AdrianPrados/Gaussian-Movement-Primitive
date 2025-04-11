@@ -10,7 +10,7 @@ def normalize(vector):
     return vector / np.linalg.norm(vector)
 
 
-def execute_ObsAv(positions,head,obstacles):
+def execute_ObsAv(positions,head,obstacles,shape='sphere'):
     node = head
     flag=[False]*len(positions)
     path = [(0,0,0)]*len(positions)
@@ -51,7 +51,10 @@ def execute_ObsAv(positions,head,obstacles):
             #add_points = False
             if add_points[0]!=False:
                 
-                flag_added= node.is_outside_obstacle(add_points[0],obstacles)
+                if shape=='sphere':
+                    flag_added= node.is_outside_obstacle(add_points[0],obstacles)
+                elif shape=='rectangle':
+                    flag_added= node.is_outside_obstacleRect(add_points[0],obstacles)
                 path.insert(i,add_points[1])
                 flag.insert(i,flag_added)
                 i = i+1
@@ -60,7 +63,10 @@ def execute_ObsAv(positions,head,obstacles):
             else:
                 flag_added = True
 
-            flag_node= node.is_outside_obstacle(node,obstacles)
+            if shape=='sphere':
+                flag_node= node.is_outside_obstacle(node,obstacles)
+            elif shape=='rectangle':
+                flag_node= node.is_outside_obstacleRect(node,obstacles)
             if flag_node == True and flag_added == True:
                 flag[i]=True
             else:
@@ -97,47 +103,90 @@ def execute_ObsAv(positions,head,obstacles):
             path.remove(path[-1])
             break
     return path
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 class Obstacle:
-    def __init__(self, center, radius,force,threshold):
-        self.center_draw=center
+    def __init__(self, center, radius=None, force=[0, 0, 0], threshold=0, shape='sphere', dimensions=None):
+        self.center_draw = center
         self.center = np.array(center)
         self.radius = radius
-        self.ObsForce=np.array(force)
-        self.threshold=threshold
+        self.ObsForce = np.array(force)
+        self.threshold = threshold
+        self.shape = shape
+        self.dimensions = dimensions  # Solo se usa si el obstáculo es un rectángulo
 
-    def drawSphere(self,color,alpha,ax):
-        # Crear malla de puntos para la esfera
+    def draw(self, color, linestyle='-', alpha=0.3, ax=None):
+        if self.shape == 'sphere':
+            self.drawSphere(color, alpha, ax)
+        elif self.shape == 'rectangle':
+            self.drawRectangle(color, alpha, ax)
+
+    def drawSphere(self, color, alpha, ax):
+        # Crear y dibujar la esfera
         phi, theta = np.mgrid[0.0:2.0 * np.pi:20j, 0.0:np.pi:10j]
         x = self.center_draw[0] + self.radius * np.sin(theta) * np.cos(phi)
         y = self.center_draw[1] + self.radius * np.sin(theta) * np.sin(phi)
         z = self.center_draw[2] + self.radius * np.cos(theta)
-
-        # Dibujar la esfera
         ax.plot_surface(x, y, z, color=color, alpha=alpha)
 
-    def draw(self, color,linestyle='-'):
-        plt.gca().add_patch(plt.Circle((self.center_draw), self.radius, color=color, fill=False,linestyle=linestyle))
+    def drawRectangle(self, color, alpha, ax):
+        # Dibujar el rectángulo en 3D
+        # Obtener las dimensiones y el centro para el obstáculo rectangular
+        width, height, depth = self.dimensions
+        x, y, z = self.center_draw
+        
+        # Calcular las esquinas del rectángulo
+        corners = [
+            (x - width / 2, y - height / 2, z - depth / 2),
+            (x + width / 2, y - height / 2, z - depth / 2),
+            (x + width / 2, y + height / 2, z - depth / 2),
+            (x - width / 2, y + height / 2, z - depth / 2),
+            (x - width / 2, y - height / 2, z + depth / 2),
+            (x + width / 2, y - height / 2, z + depth / 2),
+            (x + width / 2, y + height / 2, z + depth / 2),
+            (x - width / 2, y + height / 2, z + depth / 2),
+        ]
 
-    def draw_thresh(self, color,linestyle='-'):
-        plt.gca().add_patch(plt.Circle((self.center_draw), self.radius + self.threshold, color=color, fill=False,linestyle=linestyle))
+        # Dibujar las aristas del rectángulo
+        edges = [
+            (0, 1), (1, 2), (2, 3), (3, 0),  # Base inferior
+            (4, 5), (5, 6), (6, 7), (7, 4),  # Base superior
+            (0, 4), (1, 5), (2, 6), (3, 7)   # Aristas verticales
+        ]
+        for start, end in edges:
+            ax.plot(*zip(corners[start], corners[end]), color=color, linestyle='solid', alpha=alpha)
 
     def calculate_distance(self, point):
-        # Calcular la distancia euclidiana entre el punto y el centro del obstáculo
-        distance = np.linalg.norm(np.array(point) - np.array(self.center))
-        return distance
+        if self.shape == 'sphere':
+            # Distancia al centro de la esfera
+            distance = np.linalg.norm(np.array(point) - self.center)
+            return distance
+        elif self.shape == 'rectangle':
+            # Distancia a los bordes del rectángulo
+            point = np.array(point)
+            min_corner = self.center - np.array(self.dimensions) / 2
+            max_corner = self.center + np.array(self.dimensions) / 2
+            clamped_point = np.maximum(min_corner, np.minimum(point, max_corner))
+            return np.linalg.norm(point - clamped_point)
 
     def is_within_radius(self, point):
-        # Verificar si el punto está dentro del radio del obstáculo considerando un umbral
         distance = self.calculate_distance(point)
-        return distance <= (self.radius + self.threshold)
+        if self.shape == 'sphere':
+            return distance <= (self.radius + self.threshold)
+        elif self.shape == 'rectangle':
+            return distance <= self.threshold
+
     def is_inside_obstacle(self, point):
-        # Verificar si el punto está dentro del radio del obstáculo
-        distance = self.calculate_distance(point)
-        return distance <= self.radius
+        if self.shape == 'sphere':
+            return self.calculate_distance(point) <= self.radius
+        elif self.shape == 'rectangle':
+            return self.is_within_radius(point)
 
 class Node:
     def __init__(self, pos = None, prv = None, nxt = None,
-                locked = False, mass = 1.0, jointRigidity = 1.0):
+                locked = False, mass = 1.0, jointRigidity = 1.0,shape='sphere'):
         self.pos = pos          # X, Y, V numpy array
         self.prv = prv          # previous node
         self.nxt = nxt          # next node
@@ -146,6 +195,7 @@ class Node:
         self.k = jointRigidity  # coefficient for the tension force
         self.dist = 0           # way to first node
         self.minDist = 1       # minimal distance between nodes
+        self.shape = shape
         if self.prv:
             self.dist = self.getDistance()
 
@@ -166,7 +216,10 @@ class Node:
         totForce = np.array([0, 0, 0])
         if not self.locked:
             totForce = totForce + self.getTensionForce()
-            totForce = totForce + self.getObstacleForce(obstacles=obstacles)
+            if self.shape == 'sphere':
+                totForce = totForce + self.getObstacleForce(obstacles=obstacles)
+            elif self.shape == 'rectangle':
+                totForce = totForce + self.getObstacleForceRectangle(obstacles=obstacles)
             #totForce = totForce + self.getDVForce(5)
             totForce = totForce + self.getVForce()
         return totForce
@@ -210,6 +263,42 @@ class Node:
                 #obstacleForce = (pos - obsPos)*self.mass / (dist*dist)
             total_force = total_force + obstacleForce
         return np.append(total_force * 20, 0)[0:3] #* 15 is the force multiplier, that very sensitive to the force applied
+    
+    
+    def calculate_distance_to_rectangle(self, point):
+        # Calcular la distancia de un punto a un obstáculo rectangular
+        x, y, z = point
+        cx, cy, cz = self.pos[0:3]
+        width, height, depth = self.dimensions
+        
+        # Calcular la distancia al centro del rectángulo en cada eje
+        dx = max(abs(x - cx) - width / 2, 0)
+        dy = max(abs(y - cy) - height / 2, 0)
+        dz = max(abs(z - cz) - depth / 2, 0)
+
+        # La distancia es la suma de las distancias a cada eje
+        return np.sqrt(dx**2 + dy**2 + dz**2)
+
+    def getObstacleForceRectangle(self, obstacles):
+        total_force = obstacles[0].ObsForce * 0
+        beta = 0.0
+        for obstacle in obstacles:
+            pos = self.pos[0:3]
+            obstacleForce = obstacle.ObsForce
+            # Obtenemos la posición del obstáculo
+            obsPos = obstacle.center
+            dist = self.calculate_distance_to_rectangle(pos)
+            
+            if dist < self.threshold:
+                # Si la distancia es menor que el umbral, aplicamos la fuerza
+                obstacleForce = (pos - obsPos) / (dist + 1e-6)**2  # Prevent division by zero
+            else:
+                # Si no, aplicamos una fuerza más pequeña
+                obstacleForce = (pos - obsPos) / (dist + 1e-6)**2 * beta
+
+            total_force = total_force + obstacleForce
+        return np.append(total_force * 20, 0)[0:3] 
+    
 
     def getDVForce(self, aMax):
         force = np.array([0, 0, 0])
@@ -330,6 +419,25 @@ class Node:
         for obstacle in obstacles:
             obstacle_center = obstacle.center
             obstacle_radius = obstacle.radius + obstacle.threshold
+            if np.linalg.norm(node.pos[0:3] - obstacle_center) <= obstacle_radius:
+                not_collision[i]=False
+            else:
+                #node.locked=True
+                not_collision[i]=True
+            i=i+1
+        if all(not_collision)==True:
+            return True
+        else:
+            return False
+    
+    def is_outside_obstacleRect(self,node,obstacles):
+        i=0
+        not_collision=[False]*len(obstacles)
+        for obstacle in obstacles:
+            obstacle_center = obstacle.center
+            pos = self.pos[0:3]
+            dist = self.calculate_distance_to_rectangle(pos)
+            obstacle_radius = dist + obstacle.threshold
             if np.linalg.norm(node.pos[0:3] - obstacle_center) <= obstacle_radius:
                 not_collision[i]=False
             else:

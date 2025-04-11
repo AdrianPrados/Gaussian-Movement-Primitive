@@ -8,12 +8,12 @@ from ObstacleAvoidance import *
 
 np.random.seed(30)
 font_size = 18
-data = lasa.DataSet.Multi_Models_3 #? Here put the dataset that you want to use
+data = lasa.DataSet.Multi_Models_4 #? Here put the dataset that you want to use
 dt = data.dt
 demos = data.demos
 gap = 30
 #lasa.utilities.plot_model(lasa.DataSet.BendedLine) #? If you want to plot the data uncomment this line 
-lasa.utilities.plot_model(lasa.DataSet.Multi_Models_3) #? If you want to plot the data uncomment this line 
+lasa.utilities.plot_model(data) #? If you want to plot the data uncomment this line 
 #! --------------------------------------------- loading and training the model data------------------------------------
 #*Loading all the LASA dataset that you want
 demostraciones = 3
@@ -47,8 +47,9 @@ target_t = sum(demos[i].t[:, 0::gap][0, -1] for i in range(demostraciones)) / de
 target_position = sum(demos[i].pos[:, 0::gap][:, -1] for i in range(demostraciones)) / demostraciones
 via_point0_t = sum(demos[i].t[:, 0::gap][0, 0] for i in range(demostraciones)) / demostraciones
 via_point0_position = sum(demos[i].pos[:, 0::gap][:, 0] for i in range(demostraciones)) / demostraciones
-via_point1_t = sum(demos[i].t[:, 0::gap][0, demos[i].pos[:, 0::gap].shape[1] * 2 // 4] for i in range(demostraciones)) / demostraciones
-via_point1_position = sum(demos[i].pos[:, 0::gap][:, demos[i].pos[:, 0::gap].shape[1] * 2 // 4] for i in range(demostraciones)) / demostraciones
+via_point1_t = sum(demos[i].t[:, 0::gap][0, demos[i].pos[:, 0::gap].shape[1] * 2 // 15] for i in range(demostraciones)) / demostraciones
+
+via_point1_position = sum(demos[i].pos[:, 0::gap][:, demos[i].pos[:, 0::gap].shape[1] * 2 // 15] for i in range(demostraciones)) / demostraciones
 #* Vias points
 X_ = np.array([via_point0_t, target_t]).reshape(-1, 1)
 Y_ = np.array([via_point0_position, target_position])
@@ -105,8 +106,8 @@ via_point0_position2 = sum(demos[i].pos[:, 0::gap][:, 0] for i in range(demostra
 via_point1_t2 = sum(demos[i].t[:, 0::gap][0, demos[i].pos[:, 0::gap].shape[1] * 2 // 4] for i in range(demostraciones+1,demostrac_fin)) / (demostrac_fin - (demostraciones+1))
 via_point1_position2 = sum(demos[i].pos[:, 0::gap][:, demos[i].pos[:, 0::gap].shape[1] * 2 // 4] for i in range(demostraciones+1,demostrac_fin)) / (demostrac_fin - (demostraciones+1))
 #* Vias points
-X2_ = np.array([via_point0_t2, via_point1_t2,target_t2]).reshape(-1, 1)
-Y2_ = np.array([via_point0_position2,via_point1_position2, target_position2])
+X2_ = np.array([via_point0_t2,target_t2]).reshape(-1, 1)
+Y2_ = np.array([via_point0_position2, target_position2])
 
 
 #* Predicting for dim0
@@ -149,11 +150,24 @@ var_dim0_list = np.empty(test_x_model2_length)
 mu_dim1_list = np.empty(test_x_model2_length)
 var_dim1_list = np.empty(test_x_model2_length)
 alpha_list = np.empty(test_x_model2_length)
-for i in range(test_x_model2_length):
+""" for i in range(test_x_model2_length):
     if i <= index:
         alpha = 1
     else:
         alpha = 1 - np.tanh((i - index - 1) / model12model2_length * 5)
+    alpha_list[i] = alpha
+    mu_dim0, var_dim0 = blended_dim0.predict_single_blended_determined_input(test_2x[i], np.array([alpha, 1 - alpha]))
+    mu_dim1, var_dim1 = blended_dim1.predict_single_blended_determined_input(test_2x[i], np.array([alpha, 1 - alpha]))
+    mu_dim0_list[i] = mu_dim0
+    var_dim0_list[i] = var_dim0
+    mu_dim1_list[i] = mu_dim1
+    var_dim1_list[i] = var_dim1 """
+for i in range(test_x_model2_length):
+    if i <= index:
+        alpha = 1.0
+    else:
+        decay = (i - index - 1) / model12model2_length
+        alpha = 1.0 / (1.0 + np.exp(10 * (decay - 0.5)))  # sigmoide invertida
     alpha_list[i] = alpha
     mu_dim0, var_dim0 = blended_dim0.predict_single_blended_determined_input(test_2x[i], np.array([alpha, 1 - alpha]))
     mu_dim1, var_dim1 = blended_dim1.predict_single_blended_determined_input(test_2x[i], np.array([alpha, 1 - alpha]))
@@ -191,7 +205,7 @@ plt2.fill_between(test_2x, mean_blended2[0] - 5 * np.sqrt(var_blended2[0]), mean
 plt2.scatter(X2_[:, 0], Y2_[:, 0], s=400, c='red', marker='x')
 plt2.scatter(X2[:, 0], Y2[:, 0], s=15, c='red', marker='o', alpha=0.3)
 plt2.plot(test_2x, mu_dim0_list, c='grey', linewidth=3, label='$x_{merged}$')
-plt2.fill_between(test_2x, mu_dim0_list - 5 * np.sqrt(var_dim0_list), mu_dim0_list + 5 * np.sqrt(var_dim0_list), color='grey', alpha=alpha)
+plt2.fill_between(test_2x, mu_dim0_list - 5 * np.sqrt(var_dim0_list), mu_dim0_list + 5 * np.sqrt(var_dim0_list), color='grey', alpha=0.3)
 plt2.legend(loc='upper left', frameon=False, handlelength=1, ncol=3, columnspacing=1)
 plt2.tick_params(labelsize=font_size)
 plt2.set_xlabel('(b)', fontsize=font_size)
@@ -207,7 +221,7 @@ plt3.fill_between(test_2x, mean_blended2[1] - 5 * np.sqrt(var_blended2[1]), mean
 plt3.scatter(X2_[:, 0], Y2_[:, 1], s=400, c='red', marker='x')
 plt3.scatter(X2[:, 0], Y2[:, 1], s=15, c='red', marker='o', alpha=0.3)
 plt3.plot(test_2x, mu_dim1_list, c='grey', linewidth=3, label='$y_{merged}$')
-plt3.fill_between(test_2x, mu_dim1_list - 15* np.sqrt(var_dim1_list), mu_dim1_list + 15* np.sqrt(var_dim1_list), color='grey', alpha=alpha)
+plt3.fill_between(test_2x, mu_dim1_list - 5* np.sqrt(var_dim1_list), mu_dim1_list + 5* np.sqrt(var_dim1_list), color='grey', alpha=0.3)
 plt3.legend(loc='upper left', frameon=False, handlelength=1, ncol=3, columnspacing=1)
 plt3.tick_params(labelsize=font_size)
 plt3.set_xlabel('(c)', fontsize=font_size)

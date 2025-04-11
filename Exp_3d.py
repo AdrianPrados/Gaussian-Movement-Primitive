@@ -11,29 +11,30 @@ from scipy.io import loadmat
 import pandas as pd
 
 
-#! ---- Code for real dat laod with Panda ----
-""" dt = 0.01
-demostraciones = 5
+#! ---- Code for real data from robots----
+dt = 0.01
+gap = 10
+""" demostraciones = 3
 data_dict = {}
 values = []
 lengths = []
 
-for i in range(1, 6):
-    file_name = f"/home/nox/Escritorio/motion_primitives/GaussianMotion/ExpCartesianIiwa/obstacle_{i}.csv"
+for i in range(1, 4):
+    file_name = f"/home/nox/Escritorio/motion_primitives/GaussianMotion/ExpLeapHand2/JuancarExp1_{i}.csv"
     data = pd.read_csv(file_name)
-    lengths.append(len(data['x'][::30]))
+    lengths.append(len(data['x'][::gap]))
 
 min_length = min(lengths)
 
-for i in range(1, 6):
-    file_name = f"/home/nox/Escritorio/motion_primitives/GaussianMotion/ExpCartesianIiwa/obstacle_{i}.csv"
+for i in range(1, 4):
+    file_name = f"/home/nox/Escritorio/motion_primitives/GaussianMotion/ExpLeapHand2/JuancarExp1_{i}.csv"
     data = pd.read_csv(file_name)
     
-    x_data = np.array(data['x'][::30])[:min_length]*10
-    y_data = np.array(data['y'][::30])[:min_length]*10
-    z_data = np.array(data['z'][::30])[:min_length]*10
+    x_data = np.array(data['x'][::gap])[:min_length]*10
+    y_data = np.array(data['y'][::gap])[:min_length]*10
+    z_data = np.array(data['z'][::gap])[:min_length]*10
     
-    data_dict[f"obstacle_{i}"] = np.array([x_data, y_data, z_data])
+    data_dict[f"JuancarExp1_{i}"] = np.array([x_data, y_data, z_data])
     values.append(np.array([x_data, y_data, z_data]))
 
 
@@ -43,13 +44,13 @@ for key, value in data_dict.items():
     X_ = t.T
     Y_ = pos.T
     print(Y_.shape)
-    if key == "obstacle_1":
+    if key == "JuancarExp1_1":
+        size = Y_.shape[0]
         X = X_
         Y = Y_
     else:
         X = np.vstack((X, X_))
         Y = np.vstack((Y, Y_)) """
-
 #!---- Code for RAIL datatset ----
 def leer_archivos_mat(ruta_carpeta,number):
     data = {}
@@ -75,9 +76,9 @@ def leer_archivos_mat(ruta_carpeta,number):
 
 
 
-# Ptah to folder with .mat
-ruta_carpeta = '/home/nox/Escritorio/motion_primitives/GaussianMotion/RAIL/PUSHING'
-number = 2
+# Path to folder with .mat
+ruta_carpeta = '/home/nox/Escritorio/motion_primitives/GaussianMotion/RAIL/REACHING'
+number = 6
 data = leer_archivos_mat(ruta_carpeta,number)
 
 # Example of use: print the data from 1.mat
@@ -99,6 +100,7 @@ for i in range(demostraciones):
     X_ = t.T
     Y_ = pos.T
     if i == 0:
+        size = Y_.shape[0]
         X = X_
         Y = Y_
     else:
@@ -114,28 +116,31 @@ print(type(pos))
 target_position=np.array([values[2][0][-1], values[2][1][-1], values[2][2][-1]])
 
 via_point0_t = t[0][0]
-via_point0_position= np.array([x_data[0], y_data[0], z_data[0]])
+via_point0_position= np.array([x_data[0], y_data[0], z_data[0]]) """
 
-via_point1_t = t[0][20]
-via_point1_position = np.array([values[3][0][20],values[3][1][20], values[3][2][20]]) """
+""" via_point1_t = t[0][106]
+via_point1_position = np.array([values[2][0][106],values[2][1][106], values[2][2][106]]) """
 
 #* Constructing the training set with the target and via points
 #! Points for RAIL data
+#size = demos[0].pos[:, 0::gap].T.shape[0]
 target_t = sum(demos[i]['time'][0].T[:, 0::gap][0, -1] for i in range(demostraciones)) / demostraciones
 target_position = sum(demos[i]['pos'][0].T[:, 0::gap][:, -1]*10 for i in range(demostraciones)) / demostraciones
 via_point0_t = sum(demos[i]['time'][0].T[:, 0::gap][0, 0] for i in range(demostraciones)) / demostraciones
 via_point0_position = sum(demos[i]['pos'][0].T[:, 0::gap][:, 0]*10 for i in range(demostraciones)) / demostraciones
-via_point1_t = sum(demos[i]['time'][0].T[:, 0::gap][0, demos[i]['pos'][0].T[:, 0::gap].shape[1] * 2 // 4] for i in range(demostraciones)) / demostraciones
-via_point1_position = sum(demos[i]['pos'][0].T[:, 0::gap][:, demos[i]['pos'][0].T[:, 0::gap].shape[1] * 2 // 4]*10 for i in range(demostraciones)) / demostraciones
+via_point1_t = sum(demos[i]['time'][0].T[:, 0::gap][0, demos[i]['pos'][0].T[:, 0::gap].shape[1] * 2 // 10] for i in range(demostraciones)) / demostraciones
+via_point1_position = sum(demos[i]['pos'][0].T[:, 0::gap][:, demos[i]['pos'][0].T[:, 0::gap].shape[1] * 2 // 10]*10 for i in range(demostraciones)) / demostraciones
 #Vias points
+
 X_ = np.array([via_point0_t,via_point1_t, target_t]).reshape(-1, 1)
-Y_ = np.array([via_point0_position,via_point1_position, target_position])
+Y_ = np.array([via_point0_position,via_point1_position + np.array([0.2,0.90,0.15]), target_position])
 
 
 #time.sleep(1000)
 # predicting for dim0   --> size=demos[0]['pos'][0].T[:, 0::gap].T.shape[0]
 observation_noise = 1.0
-gp_mp= ProGpMp(X, Y, X_, Y_,dim=3, demos=demostraciones,size = demos[0].pos[:, 0::gap].T.shape[0] , observation_noise=observation_noise)
+#gp_mp= ProGpMp(X, Y, X_, Y_,dim=3, demos=demostraciones,size = demos[0].pos[:, 0::gap].T.shape[0] , observation_noise=observation_noise) # For RAIL data use: demos[0].pos[:, 0::gap].T.shape[0]
+gp_mp= ProGpMp(X, Y, X_, Y_,dim=3, demos=demostraciones,size = size, observation_noise=observation_noise) # For real data
 
 gp_mp.BlendedGpMp(gp_mp.ProGP) #? If you use more than one GpMp is mandatory to use BlendedGpMp, input: list[]
 test_x = np.arange(0.0, target_t, dt)
@@ -169,7 +174,7 @@ plt.subplots_adjust(left=0.1, right=0.9, wspace=0.5, hspace=0.5, bottom=0.15, to
 ax1 = fig.add_subplot(121, projection='3d')
 ax1.scatter(Y_[:, 0], Y_[:, 1], Y_[:, 2], s=600, c='blue', marker='x')
 ax1.scatter(Y[:, 0], Y[:, 1], Y[:, 2], s=20, c='blue', marker='o', alpha=0.3)
-ax1.plot(mean_blended[0], mean_blended[1], mean_blended[2], c='blue', linewidth=5, label='$ProGpMp$')
+ax1.plot(mean_blended[0], mean_blended[1], mean_blended[2], c='black', linewidth=5, label='$ProGpMp$')
 
 ax1.legend(loc='upper left', frameon=False, handlelength=1, ncol=3, columnspacing=1)
 ax1.set_xlabel('$x$/mm', fontsize=font_size)
@@ -178,7 +183,7 @@ ax1.set_zlabel('$z$/mm', fontsize=font_size)
 
 #* 2D visualization
 ax2 = fig.add_subplot(322)
-ax2.plot(test_x, mean_blended[0], c='red', linewidth=3, label='$x_{ProGP}$')
+ax2.plot(test_x, mean_blended[0], c='red', linewidth=3, label='$x_{GMP}$')
 ax2.fill_between(test_x, mean_blended[0] - 5 * np.sqrt(var_blended[0]), mean_blended[0] + 5 * np.sqrt(var_blended[0]), color='red', alpha=0.3)
 ax2.scatter(X_[:, 0], Y_[:, 0], s=200, c='red', marker='x')
 ax2.scatter(X[:, 0], Y[:, 0], s=10, c='red', marker='o', alpha=0.3)
@@ -187,7 +192,7 @@ ax2.set_xlabel('(b)', fontsize=font_size)
 ax2.set_ylabel('$x$/mm', fontsize=font_size)
 
 ax3 = fig.add_subplot(324)
-ax3.plot(test_x, mean_blended[1], c='blue', linewidth=3, label='$y_{ProGP}$')
+ax3.plot(test_x, mean_blended[1], c='blue', linewidth=3, label='$y_{GMP}$')
 ax3.fill_between(test_x, mean_blended[1] - 5 * np.sqrt(var_blended[1]), mean_blended[1] + 5 * np.sqrt(var_blended[1]), color='blue', alpha=0.3)
 ax3.scatter(X_[:, 0], Y_[:, 1], s=200, c='blue', marker='x')
 ax3.scatter(X[:, 0], Y[:, 1], s=10, c='blue', marker='o', alpha=0.3)
@@ -196,7 +201,7 @@ ax3.set_xlabel('(c)', fontsize=font_size)
 ax3.set_ylabel('$y$/mm', fontsize=font_size)
 
 ax4 = fig.add_subplot(326)
-ax4.plot(test_x, mean_blended[2], c='green', linewidth=3, label='$z_{ProGP}$')
+ax4.plot(test_x, mean_blended[2], c='green', linewidth=3, label='$z_{GMP}$')
 ax4.fill_between(test_x, mean_blended[2] - 5 * np.sqrt(var_blended[2]), mean_blended[2] + 5 * np.sqrt(var_blended[2]), color='green', alpha=0.3)
 ax4.scatter(X_[:, 0], Y_[:, 2], s=200, c='green', marker='x')
 ax4.scatter(X[:, 0], Y[:, 2], s=10, c='green', marker='o', alpha=0.3)
@@ -216,10 +221,10 @@ save_points =[]
 positions = []
 collided = []
 #! Example 1
-obstacle=Obstacle(center=[60,5,5],radius=15,force=[0,0,0],threshold=5) #(110,-20,0)
+""" obstacle=Obstacle(center=[60,5,5],radius=15,force=[0,0,0],threshold=5) #(110,-20,0)
 obstacles.append(obstacle)
 obstacle2=Obstacle(center=[60,-10,22],radius=5,force=[0,0,0],threshold=5) #(110,-20,0)
-obstacles.append(obstacle2)
+obstacles.append(obstacle2) """
 #! Example 2
 """ obstacle=Obstacle(center=[61,51,5],radius=10,force=[0,0,0],threshold=1) #(110,-20,0)
 obstacles.append(obstacle) """
@@ -233,8 +238,29 @@ obstacles.append(obstacle3) """
 obstacles.append(obstacle2)
 obstacle3 = Obstacle(center=[240,50,0],radius=40,force=[0,0,0],threshold=20) """
 #obstacles.append(obstacle3)
-#! Real data
+#! Real data for IIWA
 """ obstacle=Obstacle(center=[85.5,0,30],radius=10,force=[0,0,0],threshold=1) #(110,-20,0)
+obstacles.append(obstacle) """
+#! Real data for ADAM
+""" obstacle=Obstacle(center=[25,-55,80],radius=20,force=[0,0,0],threshold=5) #(110,-20,0)
+obstacles.append(obstacle) """
+
+obstacle=Obstacle(center=[53,-53,95],radius=15,force=[0,0,0],threshold=6)
+""" obstacle=Obstacle(center=[47,-53,90],radius=15,force=[0,0,0],threshold=6) #* Caja grande """
+obstacles.append(obstacle)
+obstacle2=Obstacle(center=[50,-55,125],radius=9,force=[0,0,0],threshold=2) #*Cil1 
+obstacles.append(obstacle2)
+obstacle3=Obstacle(center=[50,-45,125],radius=9,force=[0,0,0],threshold=2) #*Cil2 
+obstacles.append(obstacle3)
+obstacle4=Obstacle(center=[50,-50,125],radius=9,force=[0,0,0],threshold=2) #*Cil2 
+obstacles.append(obstacle4)
+obstacle5=Obstacle(center=[50,-40,125],radius=9,force=[0,0,0],threshold=2) #*Cil2 
+obstacles.append(obstacle5)
+obstacle6=Obstacle(center=[50,-60,125],radius=9,force=[0,0,0],threshold=2) #*Cil2 
+obstacles.append(obstacle6)
+obstacle7=Obstacle(center=[16,-70,77],radius=14,force=[0,0,0],threshold=4) #* Caja grande
+obstacles.append(obstacle7)
+""" obstacle = Obstacle(center=[45,-50,85],dimensions= [30,20,20],force=[0,0,0],threshold=1,shape='rectangle')
 obstacles.append(obstacle) """
 
 
@@ -300,18 +326,34 @@ if len(ind[0]) != 0:
     #* Plotting the local path
     obstacles=[]
     #! Example1
-    obstacle=Obstacle(center=[6,0.5,0.5],radius=1.5,force=[0,0,0],threshold=0.5) #(110,-20,0)
+    """ obstacle=Obstacle(center=[6,0.5,0.5],radius=1.5,force=[0,0,0],threshold=0.5) 
     obstacles.append(obstacle)
-    obstacle2=Obstacle(center=[6,-1,2.2],radius=1.0,force=[0,0,0],threshold=0.5) #(110,-20,0)
-    obstacles.append(obstacle2)
-    #! Example2
-    """ obstacle=Obstacle(center=[6,1.5,1.0],radius=0.8,force=[0,0,0],threshold=0.5) #(110,-20,0)
-    obstacles.append(obstacle)
-    obstacle2=Obstacle(center=[5,0.5,1.8],radius=0.8,force=[0,0,0],threshold=0.5) #(110,-20,0)
+    obstacle2=Obstacle(center=[6,-1,2.2],radius=1.0,force=[0,0,0],threshold=0.5) 
     obstacles.append(obstacle2) """
-    #! Test real values
-    """ obstacle=Obstacle(center=[8.55,0,3],radius=1,force=[0,0,0],threshold=0.1) #(110,-20,0)
+    #! Example2
+    """ obstacle=Obstacle(center=[6,1.5,1.0],radius=0.8,force=[0,0,0],threshold=0.5) 
+    obstacles.append(obstacle)
+    obstacle2=Obstacle(center=[5,0.5,1.8],radius=0.8,force=[0,0,0],threshold=0.5) 
+    obstacles.append(obstacle2) """
+    #! Test real values with IIWA
+    """ obstacle=Obstacle(center=[8.55,0,3],radius=1,force=[0,0,0],threshold=0.1) 
     obstacles.append(obstacle) """
+    
+    #! Test real values with ADAM
+    obstacle=Obstacle(center=[5.3,-5.3,9.5],radius=1.5,force=[0,0,0],threshold=0.5) 
+    obstacles.append(obstacle)
+    obstacle2=Obstacle(center=[5,-5.5,12.5],radius=0.9,force=[0,0,0],threshold=0.2) #*Cil1 
+    obstacles.append(obstacle2)
+    obstacle3=Obstacle(center=[5,-4.5,12.5],radius=0.9,force=[0,0,0],threshold=0.2) #*Cil2 
+    obstacles.append(obstacle3)
+    obstacle4=Obstacle(center=[5,-5.0,12.5],radius=0.9,force=[0,0,0],threshold=0.2) #*Cil2 
+    obstacles.append(obstacle4)
+    obstacle5=Obstacle(center=[5,-4.0,12.5],radius=0.9,force=[0,0,0],threshold=0.2) #*Cil2 
+    obstacles.append(obstacle5)
+    obstacle6=Obstacle(center=[5,-6.0,12.5],radius=0.9,force=[0,0,0],threshold=0.2) #*Cil2 
+    obstacles.append(obstacle6)
+    obstacle7=Obstacle(center=[1.6,-7.0,7.7],radius=1.4,force=[0,0,0],threshold=0.4) #* Caja grande
+    obstacles.append(obstacle7)
 
 
     fig3 = plt.figure(dpi=100)
@@ -328,7 +370,7 @@ if len(ind[0]) != 0:
     plt.show()
     
     #! Save data in .csv (if nedeed)
-    timeData = np.linspace(0, 6, 405)
+    timeData = np.linspace(0, 6, mean_blended[0].shape[0])
     print(timeData.shape)
     print(t.T.reshape(-1).shape)
     print(mean_blended[0].shape)
@@ -341,9 +383,9 @@ if len(ind[0]) != 0:
     df = pd.DataFrame(data_out)
 
     # Save dataFrame
-    output_file = '/home/nox/Escritorio/motion_primitives/GaussianMotion/ExpCartesianIiwa/Collisionoutput.csv'
+    output_file = '/home/nox/Escritorio/motion_primitives/GaussianMotion/ExpCartesianADAM/Collisionoutput.csv'
     df.to_csv(output_file, index=False)
     
     
 else:
-    print("Without collision :)") 
+    print("Without collision") 

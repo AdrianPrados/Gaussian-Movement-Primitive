@@ -3,7 +3,7 @@
   <img src="Images/Schematic.png" height=200 />
 </p>
 
-Currently, the use of Learning from Demonstration (LfD) techniques has proven effective for encoding human skills to solve specific tasks. Among all existing techniques, the use of algorithms based on movement primitives presents an effective way to encode basic robot movements. Most of these techniques learn through parametric approaches, which increases the demands for human effort and also limits reproduction accuracy. Additionally, many LfD techniques focus on working in static environments, without considering how the skill might change in the presence of obstacles in the environment. In this work, we present a non-parametric movement primitive generation algorithm based on the use of Gaussian Processes (GP), called Gaussian Movement Primitive (GMP). Unlike other techniques, our algorithm has a sufficient condition to ensure that the generated trajectory can pass through the desired points with 100% probability, as well as the ability to be combined analytically and to avoid obstacles that may appear in the environment. To verify its efficiency, comparisons have been made in simulations on the LASA and RAIL datasets against other state-of-the-art algorithms to show the advantages of the presented algorithm, as well as experiments in real environments with a robotic arm.
+Currently, the use of Learning from Demonstration (LfD) techniques has proven to be effective for encoding human skills to solve specific tasks. Among all existing approaches, algorithms based on movement primitives offer an efficient method for encoding fundamental robot motions. Most of these methods rely on parametric approximations, which increases the need for user-provided information and limits the precision in task reproduction. Furthermore, many LfD techniques focus on static environments, without considering how the environment might change?such as the appearance of objects or obstacles that were not present during the data collection phase. This work presents a non-parametric movement primitive generation algorithm based on Gaussian Processes, called Gaussian Movement Primitive (GMP). Unlike other techniques, our algorithm explicitly considers via-points during the solution process, ensuring that the generated trajectory is free of uncertainty at those points. Additionally, it supports analytical combination, works in both Cartesian and configuration spaces, and can avoid obstacles that may appear in the environment. To validate its effectiveness, simulations were conducted on the LASA and RAIL datasets, comparing GMP with other widely used LfD algorithms for robotic task learning. Real-world experiments were also carried out using two different robotic manipulators. The algorithm shows improvements in the evaluation metrics used for comparison, while also demonstrating the ability to solve tasks in various dimensions, enabling it to operate in 2D or 3D Cartesian spaces as well as configuration spaces.
 
 The developed method allows working both in the *N-dimensional joint space* and in the *Cartesian space*.
 
@@ -49,17 +49,26 @@ There are different codes that you can try with our implementation:
 
 - [`blending.py`](./blending.py):This script allows to visualize the union process of two or more GPs generated with our algorithm. This allows to perform an information merging process using different union functions set by the value of $\alpha$. An example is provided in the next image:
 <p align="center">
+  <img src="Images/Merged1.png" height=160 />
   <img src="Images/Merged2.png" height=180 />
 </p>
 
+- [Exp_Joints.py](./Exp_Joints.py): This code allows the execution of the GMP algorithm in *N* dimensions, with each dimension representing a joint of the robotic arm to be controlled. The algorithm also supports the addition of via-points in the configuration space.
+<p align="center">
+  <img src="Images/JointReal.png" height=180 />
+</p>
+
 ### **Experiments with robot manipulator**
-To test the efficiency of the algorithm, experiments have been carried out with a manipulator in a real environment. For this purpose, a series of data have been taken by means of a kinesthetic demonstration and then tested using the method in both Cartesian space and configuration space. An example of the data collection is provided below:
+To test the efficiency of the algorithm, experiments have been carried out with two robotic platforms. For this purpose, a series of data have been taken by means of a kinesthetic demonstration and then tested using the method in both Cartesian space and configuration space. An example of the data collection for the IIWA platforma and the ADAM robot is provided below:
 
 <p align="center">
   <img src="Images/DataKines.png" height=300 />
 </p>
+<p align="center">
+  <img src="Images/DataADAM.png" height=300 />
+</p>
 
-The video with the solution is provided on [Youtube](https://www.youtube.com/watch?v=kBT9ptGG024)
+The video with the solution for the IIWA platform in Cartesian and joint space is provided on [IIWA](https://youtu.be/0Pok3CNs21s) and the solution for ADAM solving tasks with multiple obstacles in Cartesian space and a pouring water task using the joint space for both arms is provided in [ADAM](https://youtu.be/r3a-Z35ygXs)
 
 # Citation
 If you use this code, please quote our works :blush:
