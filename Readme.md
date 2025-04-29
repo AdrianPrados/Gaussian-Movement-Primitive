@@ -36,7 +36,7 @@ pip install -r requirements.txt
 # **Algorithm execution**
 There are different codes that you can try with our implementation:
 - [`ProGP.py`](./ProGP.py): Provides the definition of the Gaussian Process class generated for the demonstration learning process.
-- [`Exp_2d.py`](./Exp_2d.py): Provides an example of use for 2D examples. It uses the collision avoidance developed for the 2D experiments, provided in [`ObstacleAvoidance.py`](./ObstacleAvoidance.py). An example of the solutions generated is presented in the left image where the method works taken into account some via-points. Another examples show how the method generates a solution avoiding the obstacle.Depending of the $\beta$ value, the solution of the avoidance path is different.
+- [`Exp_2d.py`](./Exp_2d.py): Provides an example of use for 2D examples. It uses the collision avoidance developed for the 2D experiments, provided in [`ObstacleAvoidance.py`](./ObstacleAvoidance.py). An example of the solutions generated is presented in the left image where the method works taken into account some via-points. Another examples show how the method generates a solution avoiding the obstacle.Depending of the $\Phi$ value, the solution of the avoidance path is different.
 <p align="center">
   <img src="Images/ExampleVias.png" height=180 />
   <img src="Images/BetaObs.png" height=135 />
