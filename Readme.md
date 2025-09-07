@@ -53,7 +53,7 @@ There are different codes that you can try with our implementation:
   <img src="Images/Merged2.png" height=180 />
 </p>
 
-- [Exp_Joints.py](./Exp_Joints.py): This code allows the execution of the GMP algorithm in *N* dimensions, with each dimension representing a joint of the robotic arm to be controlled. The algorithm also supports the addition of via-points in the configuration space.
+- [`Exp_Joints.py`](./Exp_Joints.py): This code allows the execution of the GMP algorithm in *N* dimensions, with each dimension representing a joint of the robotic arm to be controlled. The algorithm also supports the addition of via-points in the configuration space.
 <p align="center">
   <img src="Images/JointReal.png" height=180 />
 </p>
