@@ -16,7 +16,7 @@ To be used on your device, follow the installation steps below.
 - There is a `requirements.txt` file with all the elements neccesary for the correct instalation.
 
 
-## Install miniconda (highly-recommended)
+<!--- ## Install miniconda (highly-recommended)
 It is highly recommended to install all the dependencies on a new virtual environment. For more information check the conda documentation for [installation](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) and [environment management](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html). For creating the environment use the following commands on the terminal.
 
 ```bash
@@ -33,7 +33,7 @@ Then enter the directory and install all the requierements:
 ```bash
 cd Gaussian-Movement-Primitive
 pip install -r requirements.txt
-```
+```-->
 
 # **Algorithm execution**
 There are different codes that you can try with our implementation:
@@ -55,7 +55,7 @@ There are different codes that you can try with our implementation:
   <img src="Images/Merged2.png" height=180 />
 </p>
 
-- [Exp_Joints.py](./Exp_Joints.py): This code allows the execution of the GMP algorithm in *N* dimensions, with each dimension representing a joint of the robotic arm to be controlled. The algorithm also supports the addition of via-points in the configuration space.
+- [`Exp_Joints.py`](./Exp_Joints.py): This code allows the execution of the GMP algorithm in *N* dimensions, with each dimension representing a joint of the robotic arm to be controlled. The algorithm also supports the addition of via-points in the configuration space.
 <p align="center">
   <img src="Images/JointReal.png" height=180 />
 </p>
@@ -70,7 +70,7 @@ To test the efficiency of the algorithm, experiments have been carried out with 
   <img src="Images/DataADAM.png" height=300 />
 </p>
 
-The video with the solution for the IIWA platform in Cartesian and joint space is provided on [IIWA](https://youtu.be/0Pok3CNs21s) and the solution for ADAM solving tasks with multiple obstacles in Cartesian space and a pouring water task using the joint space for both arms is provided in [ADAM](https://youtu.be/r3a-Z35ygXs)
+The video with the solution for the IIWA platform in Cartesian and joint space is provided on [IIWA](https://youtu.be/0Pok3CNs21s) and the solution for the dual arm robot solving tasks with multiple obstacles in Cartesian space and a pouring water task using the joint space for both arms is provided in [DUAL ARM ROBOT](https://youtu.be/r3a-Z35ygXs)
 
 # Citation
 If you use this code, please quote our works :blush:
@@ -90,6 +90,6 @@ author = {Adrian Prados and Luis Moreno and Ramon Barber}
 ```
 
 ## Acknowledgement
-This work was supported by Advanced Mobile dual-arm manipulator for Elderly People Attendance (AMME) (PID2022-139227OB-I00), funded by Ministerio de Ciencia e Innovacion.
+<!--- This work was supported by Advanced Mobile dual-arm manipulator for Elderly People Attendance (AMME) (PID2022-139227OB-I00), funded by Ministerio de Ciencia e Innovacion.
 
-This work has been developed in the [Mobile Robotics Group](https://github.com/Mobile-Robots-Group-UC3M) from RoboticsLab, at University Carlos III de Madrid.
+This work has been developed in the [Mobile Robotics Group](https://github.com/Mobile-Robots-Group-UC3M) from RoboticsLab, at University Carlos III de Madrid.-->
