@@ -9,11 +9,11 @@ np.random.seed(30)
 font_size = 18
 # using multi_models 3, or you will change the loading-data code
 #data = lasa.DataSet.Multi_Models_1
-data = lasa.DataSet.Khamesh
+data = lasa.DataSet.GShape
 dt = data.dt
 print(dt)
 demos = data.demos
-gap = 30
+gap = 90
 #lasa.utilities.plot_model(lasa.DataSet.BendedLine)
 #! --------------------------------------------- Loading and training the model 1 data------------------------------------
 #*Loading all the data
@@ -62,12 +62,12 @@ via_point1_position = sum(demos[i].pos[:, 0::gap][:, demos[i].pos[:, 0::gap].sha
 via_point2_t = sum(demos[i].t[:, 0::gap][0, demos[i].pos[:, 0::gap].shape[1] * 2 // 10] for i in range(demostraciones)) / demostraciones
 via_point2_position = sum(demos[i].pos[:, 0::gap][:, demos[i].pos[:, 0::gap].shape[1] * 2 // 10] for i in range(demostraciones)) / demostraciones
 #Vias points
-X_ = np.array([via_point0_t,via_point1_t, via_point2_t,target_t]).reshape(-1, 1)
-Y_ = np.array([via_point0_position-np.array([0,-10]),via_point1_position-np.array([0,-3]),via_point2_position-np.array([3,-2]), target_position-np.array([-5,0])])
+X_ = np.array([via_point0_t,target_t]).reshape(-1, 1)
+Y_ = np.array([via_point0_position, target_position])
 
-print(X_.shape)
+""" print(X_.shape)
 print(Y_.shape)
-print(demos[0].pos[:, 0::gap].T.shape[0])
+print(demos[0].pos[:, 0::gap].T.shape[0]) """
 
 #* Predicting for dim0
 observation_noise = 1.0

@@ -3,7 +3,6 @@ import pdb
 import time
 import matplotlib.pyplot as plt
 from scipy.interpolate import splrep, BSpline
-import bezier
 
 
 def normalize(vector):

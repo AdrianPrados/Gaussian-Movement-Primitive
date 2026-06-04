@@ -7,6 +7,8 @@ Currently, the use of Learning from Demonstration (LfD) techniques has proven to
 
 The developed method allows working both in the *N-dimensional joint space* and in the *Cartesian space*.
 
+The full text is available in the journal [Engineering Applications of Artificial Intelligence](https://www.sciencedirect.com/science/article/pii/S0952197626015423?via%3Dihub)
+
 # Installation
 To be used on your device, follow the installation steps below.
 
@@ -73,7 +75,19 @@ The video with the solution for the IIWA platform in Cartesian and joint space i
 # Citation
 If you use this code, please quote our works :blush:
 
-In progress :construction_worker:
+```
+@article{PRADOS2026115258,
+title = {Learning of Movement Primitives by Gaussian Processes from demonstrations},
+journal = {Engineering Applications of Artificial Intelligence},
+volume = {179},
+pages = {115258},
+year = {2026},
+issn = {0952-1976},
+doi = {https://doi.org/10.1016/j.engappai.2026.115258},
+url = {https://www.sciencedirect.com/science/article/pii/S0952197626015423},
+author = {Adrian Prados and Luis Moreno and Ramon Barber}
+}
+```
 
 ## Acknowledgement
 This work was supported by Advanced Mobile dual-arm manipulator for Elderly People Attendance (AMME) (PID2022-139227OB-I00), funded by Ministerio de Ciencia e Innovacion.
